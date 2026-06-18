@@ -13,3 +13,14 @@ On the input (see `unoptimized_query.sql` for reference) we have a query so unef
 Additionally, the EXPLAIN ANALYZE query plan shows an enourmous Execution time figures(for full Query plan see `unoptimized_query_analyze.txt`):  
 
 <img width="1035" height="66" alt="image" src="https://github.com/user-attachments/assets/30d02b50-4ed4-4e38-bbb7-0622585a691b" />  
+
+### Procedure
+Firstly, to optimize such a monster, it is important to outline possible CTE's to get rid of the subqueries in SELECT/WHERE. Therefore, the query does around 4 things:  
+```
+selects premium products -> 
+    selects users that left a negative review on these products -> 
+        filters these users to find those that spent over 1 minute(60000 ms) viewing it before purchase. ->
+            calculates the sum of all the purchases made by customer(CLV)
+```
+That's 4 CTE's to start from.  
+And lastly, after CTE's are implemented, indexes should be created depending on the tables/columns included in filtering
