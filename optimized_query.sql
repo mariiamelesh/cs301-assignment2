@@ -1,3 +1,12 @@
+create index idx_interactions_type_user_prod 
+on interactions (interaction_type, user_id, product_id);
+create index idx_reviews_product_rating 
+on reviews (product_id, rating);
+create index idx_purchases_user_product
+on purchases (user_id, product_id);
+
+explain analyze
+
 with premium_products as (
 	select product_id, product_name
 	from products
@@ -6,7 +15,7 @@ with premium_products as (
 	select distinct r.user_id, pp.product_id
 	from reviews r
 	join premium_products pp on r.product_id = pp.product_id
-	where rating <= 2
+	where rating <= 3
 ), long_view as ( 
 	select br.user_id, br.product_id
 	from bad_reviews br
