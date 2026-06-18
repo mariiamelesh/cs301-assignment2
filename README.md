@@ -19,8 +19,22 @@ Firstly, to optimize such a monster, it is important to outline possible CTE's t
 ```
 selects premium products -> 
     selects users that left a negative review on these products -> 
-        filters these users to find those that spent over 1 minute(60000 ms) viewing it before purchase. ->
+        filters users to find those that spent over 1 minute viewing before purchase. ->
             calculates the sum of all the purchases made by customer(CLV)
 ```
 That's 4 CTE's to start from.  
 And lastly, after CTE's are implemented, indexes should be created depending on the tables/columns included in filtering
+
+### Output
+After the optimization, the following query(see `optimized_query.sql` for reference) was developed:  
+
+<img width="793" height="486" alt="image" src="https://github.com/user-attachments/assets/4bfa9262-574f-4770-b663-8211128c2775" />  
+
+Indexing choice in `interaction` table can be explained by the fact that `long_view` CTE is filtering that table by `interaction_type` and further joins it by `user_id` and `product_id`. Same goes for `reviews`, where filtering is done by using <= operators on `rating` column and joins on `product_id` column. As per `purchases` table, `lifetime_value` CTE doesn't actually do any filtering on it, however joins it to the `long_view` table. As a matter of fact, I chose not to use indexing for `products` table, since it won't do any good for %-like filtering and the algorithm would complete a Full-Text Scan anyway.  
+
+To see how indexing affected the Execution time, here's the Before/After comparison figure(see `optimized_query_unindexed_analyze.txt` and `optimized_query_indexed_analyze.txt` for detailed Query plan):  
+<img width="1831" height="376" alt="image" src="https://github.com/user-attachments/assets/4e6e67e6-27fa-4b5c-87ba-75df147025f2" />  
+
+Basically, after the optimization Execution time got 35 times smaller(around 2600 -> 74). Furthermore, after adding indexing, query execution time became 10 times lower(74 -> 7). In the result, we have a x350 decrease of query execution time, which I believe to be a full-on victory :)
+
+## BONUS! Optimizer control
