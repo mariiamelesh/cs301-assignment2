@@ -6,4 +6,10 @@ Dataset used for querying consists of 6 tables and shows an imitation data from 
 Purpose of the query is to point out a specific group of customers which have left a negative review(reviews with rating <= 3) after a purchase of a product form an exclusively expensive category. Additionally, query filters out the users to include only those that have an overall view-type interaction with product for over than 1 minute(means that the user has been viewing the product before purchase for a good amount of time). In the result, query returns an information on the customer(id and country of origin), product name and customers' lifetime value(total amount of money a person spent at the retailers' shop). Basically, this query is good for nothing but just fun. Doesn't bring any useful information to the table, however can be used for lolz.
 ## Optimization plan!
 ### Input
-On the input (see `unoptimized_query.sql` for reference) we have a query so unefficient it almost crashed my DBeaver as I ran it.
+On the input (see `unoptimized_query.sql` for reference) we have a query so unefficient it almost crashed my DBeaver as I ran it. On the image it is clearly noticible that the input query has some issues with efficiency and readability: 
+
+<img width="756" height="372" alt="image" src="https://github.com/user-attachments/assets/56f164ca-8e90-494f-82d2-2f16910c6186" />  
+
+Additionally, the EXPLAIN ANALYZE query plan shows an enourmous Execution time figures(for full Query plan see `unoptimized_query_analyze.txt`):  
+
+<img width="1035" height="66" alt="image" src="https://github.com/user-attachments/assets/30d02b50-4ed4-4e38-bbb7-0622585a691b" />  
