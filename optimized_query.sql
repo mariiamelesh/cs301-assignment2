@@ -5,7 +5,10 @@ on reviews (product_id, rating);
 create index idx_purchases_user_product
 on purchases (user_id, product_id);
 
-explain analyze
+--set enable_seqscan = off;
+--set enable_seqscan = on;
+
+--explain analyze
 
 with premium_products as (
 	select product_id, product_name
