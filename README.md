@@ -38,3 +38,15 @@ To see how indexing affected the Execution time, here's the Before/After compari
 Basically, after the optimization Execution time got 35 times smaller(around 2600 -> 74). Furthermore, after adding indexing, query execution time became 10 times lower(74 -> 7). In the result, we have a x350 decrease of query execution time, which I believe to be a full-on victory :)
 
 ## BONUS! Optimizer control
+Even after creating indexes, in the query plan we can still see Seq. scans on some tables:  
+<img width="920" height="30" alt="image" src="https://github.com/user-attachments/assets/9d49be74-f3ff-4580-b84d-aa69d17c1f60" />  
+<img width="949" height="35" alt="image" src="https://github.com/user-attachments/assets/09093ba8-99f1-4092-9f87-4b0f7d5d6294" />  
+<img width="741" height="33" alt="image" src="https://github.com/user-attachments/assets/68360279-5fec-432d-89c4-3ccbf65b4378" />  
+
+Of course, the algorithm is probably choosing the most efficient way of filtering tables, but we have free will to question it. Therefore, why don't we forbid it from completing a Seq. scan, in case there are other more efficient ways of searching the table. To do that, we have to set the seqscan parameter to off:  
+<img width="331" height="52" alt="image" src="https://github.com/user-attachments/assets/7c83cc32-e306-4f67-88fd-ba442a0361e2" />  
+
+However, after doing that and running an EXPLAIN-ANALYZE, in the Execution time row we can see an increase (see previous section for comparison):  
+<img width="995" height="65" alt="image" src="https://github.com/user-attachments/assets/78c24fb9-c5f1-4473-85de-9fe7017c0554" />  
+This shows that the original way of scanning the table that was ran by the algorithm in the first place was indeed more efficient, thus I'd rather turn it back on:  
+<img width="330" height="56" alt="image" src="https://github.com/user-attachments/assets/9b52ba2f-57db-412a-8312-f7aae4026ab9" />  
