@@ -1,0 +1,62 @@
+|QUERY PLAN                                                                                                                                                         |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Nested Loop Semi Join  (cost=329.25..5501.53 rows=1 width=190) (actual time=400.774..2835.624 rows=3.00 loops=1)                                                   |
+|  Join Filter: ((r.product_id)::text = (products.product_id)::text)                                                                                                |
+|  Rows Removed by Join Filter: 1710                                                                                                                                |
+|  Buffers: shared hit=376384                                                                                                                                       |
+|  ->  Hash Join  (cost=329.25..5104.33 rows=6 width=114) (actual time=362.389..2832.808 rows=19.00 loops=1)                                                        |
+|        Hash Cond: (((u.user_id)::text = (r.user_id)::text) AND ((purchases.product_id)::text = (r.product_id)::text))                                             |
+|        Join Filter: (60000 < (SubPlan 3))                                                                                                                         |
+|        Rows Removed by Join Filter: 124                                                                                                                           |
+|        Buffers: shared hit=375680                                                                                                                                 |
+|        ->  Hash Join  (cost=119.01..500.76 rows=1287 width=114) (actual time=5.351..11.224 rows=1718.00 loops=1)                                                  |
+|              Hash Cond: ((u.user_id)::text = (purchases.user_id)::text)                                                                                           |
+|              Buffers: shared hit=256                                                                                                                              |
+|              ->  Seq Scan on users u  (cost=0.00..320.64 rows=12864 width=40) (actual time=0.309..2.634 rows=10000.00 loops=1)                                    |
+|                    Buffers: shared hit=192                                                                                                                        |
+|              ->  Hash  (cost=102.93..102.93 rows=1287 width=74) (actual time=5.011..5.012 rows=1718.00 loops=1)                                                   |
+|                    Buckets: 2048  Batches: 1  Memory Usage: 194kB                                                                                                 |
+|                    Buffers: shared hit=64                                                                                                                         |
+|                    ->  HashAggregate  (cost=90.06..102.93 rows=1287 width=74) (actual time=3.269..3.973 rows=1718.00 loops=1)                                     |
+|                          Group Key: (purchases.product_id)::text, (purchases.user_id)::text                                                                       |
+|                          Batches: 1  Memory Usage: 569kB                                                                                                          |
+|                          Buffers: shared hit=64                                                                                                                   |
+|                          ->  Seq Scan on purchases  (cost=0.00..81.37 rows=1737 width=74) (actual time=0.039..1.343 rows=1737.00 loops=1)                         |
+|                                Buffers: shared hit=64                                                                                                             |
+|        ->  Hash  (cost=207.66..207.66 rows=172 width=74) (actual time=1.962..1.963 rows=172.00 loops=1)                                                           |
+|              Buckets: 1024  Batches: 1  Memory Usage: 26kB                                                                                                        |
+|              Buffers: shared hit=192                                                                                                                              |
+|              ->  Seq Scan on reviews r  (cost=0.00..207.66 rows=172 width=74) (actual time=0.042..1.811 rows=172.00 loops=1)                                      |
+|                    Filter: (rating <= 2)                                                                                                                          |
+|                    Rows Removed by Filter: 1081                                                                                                                   |
+|                    Buffers: shared hit=192                                                                                                                        |
+|        SubPlan 3                                                                                                                                                  |
+|          ->  Aggregate  (cost=4374.00..4374.01 rows=1 width=8) (actual time=19.705..19.705 rows=1.00 loops=143)                                                   |
+|                Buffers: shared hit=375232                                                                                                                         |
+|                ->  Seq Scan on interactions i  (cost=0.00..4374.00 rows=1 width=4) (actual time=15.795..19.683 rows=1.00 loops=143)                               |
+|                      Filter: (((user_id)::text = (u.user_id)::text) AND ((product_id)::text = (r.product_id)::text) AND ((interaction_type)::text = 'view'::text))|
+|                      Rows Removed by Filter: 99999                                                                                                                |
+|                      Buffers: shared hit=375232                                                                                                                   |
+|  ->  Materialize  (cost=0.00..151.75 rows=143 width=37) (actual time=0.005..0.059 rows=90.16 loops=19)                                                            |
+|        Storage: Memory  Maximum Storage: 23kB                                                                                                                     |
+|        Buffers: shared hit=128                                                                                                                                    |
+|        ->  Seq Scan on products  (cost=0.00..151.04 rows=143 width=37) (actual time=0.057..0.985 rows=102.00 loops=1)                                             |
+|              Filter: (((product_name)::text ~~ '%Pro%'::text) OR ((product_name)::text ~~ '%Max%'::text))                                                         |
+|              Rows Removed by Filter: 898                                                                                                                          |
+|              Buffers: shared hit=128                                                                                                                              |
+|  SubPlan 1                                                                                                                                                        |
+|    ->  Seq Scan on products p  (cost=0.00..147.20 rows=1 width=26) (actual time=0.051..0.224 rows=1.00 loops=3)                                                   |
+|          Filter: ((product_id)::text = (r.product_id)::text)                                                                                                      |
+|          Rows Removed by Filter: 999                                                                                                                              |
+|          Buffers: shared hit=384                                                                                                                                  |
+|  SubPlan 2                                                                                                                                                        |
+|    ->  Aggregate  (cost=85.72..85.73 rows=1 width=4) (actual time=0.243..0.243 rows=1.00 loops=3)                                                                 |
+|          Buffers: shared hit=192                                                                                                                                  |
+|          ->  Seq Scan on purchases pur  (cost=0.00..85.71 rows=1 width=4) (actual time=0.164..0.235 rows=1.67 loops=3)                                            |
+|                Filter: ((user_id)::text = (u.user_id)::text)                                                                                                      |
+|                Rows Removed by Filter: 1735                                                                                                                       |
+|                Buffers: shared hit=192                                                                                                                            |
+|Planning:                                                                                                                                                          |
+|  Buffers: shared hit=484                                                                                                                                          |
+|Planning Time: 59.193 ms                                                                                                                                           |
+|Execution Time: 2836.103 ms                                                                                                                                        |
